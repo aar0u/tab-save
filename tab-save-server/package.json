@@ -1,0 +1,12 @@
+{
+  "name": "tab-save-server",
+  "version": "1.0.0",
+  "description": "A minimal Node.js server for receiving and serving tab exports.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+  },
+  "license": "MIT"
+}

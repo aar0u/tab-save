@@ -327,8 +327,19 @@ function openFromInput() {
     window.contents = document.getElementById("inputbox").value;
     document.getElementById("inputbox").value = '';
     chrome.tabs.query({ 'currentWindow': true }, function (tabs) {
-        var lines = window.contents.split(/[\r\n|\n]+/);
-        loadUrl(lines, tabs);
+        var lines = window.contents.split(/\r?\n/);
+        // Support output.md format: lines with '- [title](url)'
+        var urlPattern = /^- \[.*?\]\((.*?)\)$/;
+        var extracted = [];
+        for (var i = 0; i < lines.length; i++) {
+            var match = lines[i].match(urlPattern);
+            if (match) {
+                extracted.push(match[1]);
+            } else {
+                extracted.push(lines[i]);
+            }
+        }
+        loadUrl(extracted, tabs);
         gogo();
     });
 }

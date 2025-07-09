@@ -29,6 +29,20 @@ function save_options2() {
     }, 750);
 }
 
+function saveRemoteUrl() {
+    var remoteUrl = document.getElementById("remoteUrl").value.trim();
+    if (remoteUrl) {
+        localStorage["tabSaveRemoteUrl"] = remoteUrl;
+    } else {
+        delete localStorage["tabSaveRemoteUrl"];
+    }
+    var status = document.getElementById("statusRemote");
+    status.innerHTML = "Remote URL Saved.";
+    setTimeout(function () {
+        status.innerHTML = "";
+    }, 750);
+}
+
 // Restores select box state to saved value from localStorage.
 function restore_options() {
     var favorite1 = localStorage["output_choice1"];
@@ -58,9 +72,18 @@ function restore_options() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', restore_options);
+function restoreRemoteUrl() {
+    var remoteUrl = localStorage["tabSaveRemoteUrl"] || "http://localhost:3000/tabs";
+    document.getElementById("remoteUrl").value = remoteUrl;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    restore_options();
+    restoreRemoteUrl();
+});
 document.querySelector('#save').addEventListener('click', save_options);
 document.querySelector('#save2').addEventListener('click', save_options2);
+document.getElementById('saveRemote').addEventListener('click', saveRemoteUrl);
 if (localStorage["output_emailadd"]) {
     document.querySelector('#emailadded').value = localStorage["output_emailadd"];
 }

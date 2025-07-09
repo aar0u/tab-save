@@ -67,6 +67,14 @@
             <p><b>file</b>: prints to file which will be named based on the date with
                 prefix "Tab_Save" and extension ".csv" for csv formats or ".txt" for text format.</p>
         </fieldset>
+        <br>
+        <fieldset>
+            <legend>Remote Server (Optional)</legend>
+            <p>Remote URL for periodic export:<br>
+                <input type="text" id="remoteUrl" style="width:90%" placeholder="http://localhost:3000/tabs">
+            </p>
+            <p><button id="saveRemote">Save</button> <span id="statusRemote"></span></p>
+        </fieldset>
     </div>
 </body>
 <script src="options.js"></script>

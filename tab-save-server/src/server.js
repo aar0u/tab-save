@@ -1,0 +1,76 @@
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+
+const PORT = 3000;
+
+const server = http.createServer((req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
+
+  if (req.url === '/tabs') {
+    if (req.method === 'POST') {
+      let body = '';
+      req.on('data', chunk => {
+        body += chunk;
+      });
+      req.on('end', () => {
+        try {
+          const data = JSON.parse(body);
+          const content = data.content || '';
+          fs.writeFile(path.join(__dirname, 'output.md'), content, err => {
+            if (err) {
+              console.error('❌ Error writing to file:', err);
+              res.writeHead(500, { 'Content-Type': 'text/plain' });
+              return res.end('Internal Server Error');
+            }
+            console.log('✅ Content received and overwritten:', content);
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            res.end('Content overwritten successfully');
+          });
+        } catch (e) {
+          res.writeHead(400, { 'Content-Type': 'text/plain' });
+          res.end('Bad Request');
+        }
+      });
+    } else if (req.method === 'GET') {
+      const filePath = path.join(__dirname, 'output.md');
+      fs.readFile(filePath, 'utf8', (err, data) => {
+        if (err) {
+          if (err.code === 'ENOENT') {
+            res.writeHead(404, { 'Content-Type': 'text/plain' });
+            return res.end('No data found');
+          }
+          res.writeHead(500, { 'Content-Type': 'text/plain' });
+          return res.end('Internal Server Error');
+        }
+        const html = `<!DOCTYPE html><html><head><meta charset='utf-8'><title>Tabs</title></head><body><pre style="white-space: pre-wrap; word-break: break-all; background:#f8f8f8; padding:1em; border-radius:6px;">` +
+          data.replace(/\((https?:\/\/[^)]+)\)/g, function(match, url) {
+            return '(<a href="' + url + '" target="_blank">' + url + '</a>)';
+          }) +
+          '</pre></body></html>';
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end(html);
+      });
+    } else {
+      res.writeHead(405, { 'Content-Type': 'text/plain' });
+      res.end('Method Not Allowed');
+    }
+  } else {
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('Not Found');
+  }
+});
+
+server.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
