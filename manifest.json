@@ -14,7 +14,7 @@
         "default_popup": "popup.html"
     },
     "options_page": "options.html",
-    "permissions": ["tabs", "alarms"],
+    "permissions": ["tabs", "alarms", "storage"],
     "background": {
         "service_worker": "background.js"
     }

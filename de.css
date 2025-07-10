@@ -10,14 +10,6 @@ body {
     float  : right;
 }
 
-#clipboardBuffer {
-    position: absolute;
-    top     : -9999px;
-    left    : -9999px;
-    width   : 0;
-    height  : 0;
-}
-
 a {
     color          : #9d0000;
     text-decoration: none;

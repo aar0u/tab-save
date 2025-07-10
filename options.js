@@ -29,18 +29,19 @@ function save_options2() {
     }, 750);
 }
 
-function saveRemoteUrl() {
+function saveRemoteSettings() {
     var remoteUrl = document.getElementById("remoteUrl").value.trim();
-    if (remoteUrl) {
-        localStorage["tabSaveRemoteUrl"] = remoteUrl;
-    } else {
-        delete localStorage["tabSaveRemoteUrl"];
-    }
-    var status = document.getElementById("statusRemote");
-    status.innerHTML = "Remote URL Saved.";
-    setTimeout(function () {
-        status.innerHTML = "";
-    }, 750);
+    var exportInterval = parseInt(document.getElementById("exportInterval").value, 10) || 5;
+    chrome.storage.sync.set({
+        tabSaveRemoteUrl: remoteUrl,
+        exportInterval: exportInterval
+    }, function() {
+        var status = document.getElementById("statusRemote");
+        status.innerHTML = "Remote settings saved.";
+        setTimeout(function () {
+            status.innerHTML = "";
+        }, 750);
+    });
 }
 
 // Restores select box state to saved value from localStorage.
@@ -72,18 +73,40 @@ function restore_options() {
     }
 }
 
-function restoreRemoteUrl() {
-    var remoteUrl = localStorage["tabSaveRemoteUrl"] || "http://localhost:3000/tabs";
-    document.getElementById("remoteUrl").value = remoteUrl;
+function displayRemoteError() {
+    chrome.storage.sync.get(["tabSaveRemoteErrorMsg"], function(result) {
+        var errorElem = document.getElementById("remoteErrorMsg");
+        if (result.tabSaveRemoteErrorMsg) {
+            errorElem.textContent = "Notice: " + result.tabSaveRemoteErrorMsg;
+            errorElem.style.display = "block";
+        } else {
+            errorElem.textContent = "";
+            errorElem.style.display = "none";
+        }
+    });
 }
+
+function restoreRemoteSettings() {
+    chrome.storage.sync.get(["tabSaveRemoteUrl", "exportInterval"], function(result) {
+        document.getElementById("remoteUrl").value = result.tabSaveRemoteUrl || "http://localhost:3000/tabs";
+        document.getElementById("exportInterval").value = result.exportInterval || 5;
+        displayRemoteError();
+    });
+}
+
+chrome.storage.onChanged.addListener(function(changes, area) {
+    if (area === "sync" && changes.tabSaveRemoteErrorMsg) {
+        displayRemoteError();
+    }
+});
 
 document.addEventListener('DOMContentLoaded', function() {
     restore_options();
-    restoreRemoteUrl();
+    restoreRemoteSettings();
 });
 document.querySelector('#save').addEventListener('click', save_options);
 document.querySelector('#save2').addEventListener('click', save_options2);
-document.getElementById('saveRemote').addEventListener('click', saveRemoteUrl);
+document.getElementById('saveRemote').addEventListener('click', saveRemoteSettings);
 if (localStorage["output_emailadd"]) {
     document.querySelector('#emailadded').value = localStorage["output_emailadd"];
 }

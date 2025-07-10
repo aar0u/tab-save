@@ -1,8 +1,20 @@
 chrome.runtime.onInstalled.addListener(() => {
-  console.log("alarm extension installed");
-  // Every 5 minutes, trigger the alarm
-  chrome.alarms.create("exportTabs", { periodInMinutes: 5 });
+  console.log("extension installed");
+  setExportAlarm();
 });
+
+chrome.runtime.onStartup && chrome.runtime.onStartup.addListener(() => {
+  console.log("extension started");
+  setExportAlarm();
+});
+
+function setExportAlarm() {
+  chrome.storage.sync.get(["exportInterval"], (result) => {
+    const interval = parseInt(result.exportInterval, 10) || 5;
+    chrome.alarms.create("exportTabs", { periodInMinutes: interval });
+    console.log("alarm set for every", interval, "minutes");
+  });
+}
 
 chrome.alarms.onAlarm.addListener((alarm) => {
   console.log("alarm triggered:", alarm.name);
@@ -19,16 +31,51 @@ function exportTabsAsMarkdown() {
     const now = new Date().toLocaleString();
     const payload = `### 📌 ${now}\n\n${markdown}\n\n---\n`;
 
-    const remoteUrl =
-      localStorage["tabSaveRemoteUrl"] || "http://localhost:3000/tabs";
-    fetch(remoteUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: payload }),
-    })
-      .then((res) => {
-        console.log("✅ Tabs exported successfully:", res.status);
+    chrome.storage.sync.get([
+      "tabSaveRemoteUrl",
+      "tabSaveRemoteFailCount",
+      "tabSaveRemoteErrorMsg"
+    ], (result) => {
+      const remoteUrl = result.tabSaveRemoteUrl || "http://localhost:3000/tabs";
+      const failCount = result.tabSaveRemoteFailCount || 0;
+      const FAIL_THRESHOLD = 3;
+
+      fetch(remoteUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: payload }),
       })
-      .catch((err) => console.error("❌ Error:", err));
+        .then((res) => {
+          console.log("✅ Tabs exported successfully:", res.status);
+          chrome.storage.sync.set({
+            tabSaveRemoteFailCount: 0,
+            tabSaveRemoteErrorMsg: ""
+          });
+        })
+        .catch((err) => {
+          const newFailCount = failCount + 1;
+          let errorObj = { tabSaveRemoteFailCount: newFailCount };
+          if (newFailCount >= FAIL_THRESHOLD) {
+            errorObj.tabSaveRemoteErrorMsg =
+              "Remote server unreachable after 3 attempts. Export stopped. Please check the server or update the remote URL.";
+            chrome.alarms.clear("exportTabs");
+            console.warn("⚠️ Remote server unreachable, alarm stopped.", err);
+          } else {
+            errorObj.tabSaveRemoteErrorMsg = "";
+            console.warn("⚠️ Warning:", err);
+          }
+          chrome.storage.sync.set(errorObj);
+        });
+    });
   });
 }
+
+// Listen for remote URL changes, reset failure count and error status, and restart alarm
+chrome.storage.onChanged.addListener(function(changes, area) {
+  if (area === "sync" && changes.tabSaveRemoteUrl) {
+    chrome.storage.sync.set({
+      tabSaveRemoteFailCount: 0,
+      tabSaveRemoteErrorMsg: ""
+    }, setExportAlarm);
+  }
+});

@@ -6,10 +6,6 @@ var myCsv = '';
 var contents;
 var openthistab = false;
 var openthese = [];
-jQuery(function ($) {
-    clipboardBuffer = $('<textarea id="clipboardBuffer"></textarea>');
-    clipboardBuffer.appendTo('body');
-});
 
 function geturls() {
     var favorite1 = localStorage["output_choice1"];
@@ -33,10 +29,7 @@ function geturls() {
                     window.myCsv += tab.url + '\n';
                 }
             });
-            clipboardBuffer.val(window.myCsv);
-            clipboardBuffer.select();
-            document.execCommand('copy');
-            jQuery('#getgone').html("URLs copied!");
+            copyToClipboard(window.myCsv).then(() => { document.getElementById('getgone').innerHTML = "URLs copied!"; });
         });
     }
     ///////////////////////////////// End clipboard
@@ -63,10 +56,7 @@ function geturls() {
                 }
             });
 
-            clipboardBuffer.val(window.myCsv);
-            clipboardBuffer.select();
-            document.execCommand('copy');
-            jQuery('#getgone').html("URLs copied!");
+            copyToClipboard(window.myCsv).then(() => { document.getElementById('getgone').innerHTML = "URLs copied!"; });
 
         });
 
@@ -173,10 +163,7 @@ function geturls() {
                 }
             });
 
-            clipboardBuffer.val(window.myCsv);
-            clipboardBuffer.select();
-            document.execCommand('copy');
-            jQuery('#getgone').html("URLs copied!");
+            copyToClipboard(window.myCsv).then(() => { document.getElementById('getgone').innerHTML = "URLs copied!"; });
 
             chrome.tabs.create({ url: action_url });
         });
@@ -317,13 +304,6 @@ function geturls() {
 //ends getURLs
 
 function openFromInput() {
-    // clipboardBuffer.val('');
-    // clipboardBuffer.select();
-    // document.execCommand('paste')
-
-    // window.contents = clipboardBuffer.val();
-    // jQuery('#getgone').html(window.contents);
-
     window.contents = document.getElementById("inputbox").value;
     document.getElementById("inputbox").value = '';
     chrome.tabs.query({ 'currentWindow': true }, function (tabs) {
@@ -430,3 +410,25 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById("button1").addEventListener('click', openFromInput);
     document.getElementById('file').addEventListener('change', handleFileSelect);
 });
+
+function copyToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+        // Modern async clipboard API, it returns a Promise
+        return navigator.clipboard.writeText(text);
+    } else {
+        // Fallback for older browsers
+        var textarea = document.getElementById('clipboardBuffer');
+        if (!textarea) {
+            textarea = document.createElement('textarea');
+            textarea.id = 'clipboardBuffer';
+            textarea.style.position = 'fixed';
+            textarea.style.top = '-1000px';
+            textarea.style.left = '-1000px';
+            document.body.appendChild(textarea);
+        }
+        textarea.value = text;
+        textarea.select();
+        document.execCommand('copy');
+        return Promise.resolve();
+    }
+}

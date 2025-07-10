@@ -73,7 +73,11 @@
             <p>Remote URL for periodic export:<br>
                 <input type="text" id="remoteUrl" style="width:90%" placeholder="http://localhost:3000/tabs">
             </p>
+            <p>Export interval (minutes):<br>
+                <input type="number" id="exportInterval" min="1" max="1440" value="5" style="width:60px"> (default: 5)
+            </p>
             <p><button id="saveRemote">Save</button> <span id="statusRemote"></span></p>
+            <p id="remoteErrorMsg" style="color:#b36b00; display:none; font-size: 90%;"></p>
         </fieldset>
     </div>
 </body>
