@@ -56,8 +56,7 @@ function exportTabsAsMarkdown() {
           const newFailCount = failCount + 1;
           let errorObj = { tabSaveRemoteFailCount: newFailCount };
           if (newFailCount >= FAIL_THRESHOLD) {
-            errorObj.tabSaveRemoteErrorMsg =
-              "Remote server unreachable after 3 attempts. Export stopped. Please check the server or update the remote URL.";
+            errorObj.tabSaveRemoteErrorMsg = "Stopped: unreachable after 3 failed attempts";
             chrome.alarms.clear("exportTabs");
             console.warn("⚠️ Remote server unreachable, alarm stopped.", err);
           } else {

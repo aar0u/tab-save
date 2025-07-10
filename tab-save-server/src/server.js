@@ -33,9 +33,9 @@ const server = http.createServer((req, res) => {
               res.writeHead(500, { 'Content-Type': 'text/plain' });
               return res.end('Internal Server Error');
             }
-            console.log('✅ Content received and overwritten:', content);
+            console.log('✅ Content received:', content);
             res.writeHead(200, { 'Content-Type': 'text/plain' });
-            res.end('Content overwritten successfully');
+            res.end('Content received successfully');
           });
         } catch (e) {
           res.writeHead(400, { 'Content-Type': 'text/plain' });

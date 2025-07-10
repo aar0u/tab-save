@@ -1,6 +1,6 @@
 # Tab Save Server
 
-A minimal Node.js server for receiving and serving tab exports from a browser extension.
+A simple Node.js server for receiving and archiving tab exports from the Tab-Save Chrome extension.
 
 ## Quick Start
 
@@ -20,4 +20,4 @@ The server listens at `http://localhost:3000/tabs`.
 
 ## License
 
-MIT
+GNU General Public License v3.0

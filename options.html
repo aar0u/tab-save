@@ -22,22 +22,23 @@
         </div>
         <label for="output1">Output format:</label>
         <select id="output1">
-          <option value="text">Text: date, title, plus url</option>
-          <option value="simple">Text: simple url</option>
+          <option value="text">Text: date, title, url</option>
+          <option value="simple">Text: url only</option>
           <option value="csv1">CSV: title, url</option>
           <option value="csv2">CSV: date, title, url</option>
           <option value="csv3">CSV: date, url</option>
+          <option value="markdown">Markdown: [title](url)</option>
         </select>
         <label for="output2">Output type:</label>
         <select id="output2">
-          <option value="screen">Page</option>
-          <option value="file">File</option>
+          <option value="html">HTML</option>
+          <option value="file">Download</option>
           <option value="clipboard">Clipboard</option>
           <option value="gmail">Email</option>
         </select>
         <div class="section-desc">
-          <b>Email</b>: Opens Gmail with subject filled; content is copied -
-          paste it manually.
+          <b>Email</b>: Opens Gmail with the subject filled in; tabs is copied
+          to clipboard - just paste it into the email.
         </div>
         <label for="emailadded">Email recipient (optional):</label>
         <input
@@ -46,11 +47,12 @@
           id="emailadded"
           placeholder="Email address"
         />
-        <div><button id="save">Save</button> <span id="status"></span></div>
       </fieldset>
       <fieldset>
         <legend>Remote Server (Optional)</legend>
-        <div class="section-desc">Sent open tabs to a remote server.</div>
+        <div class="section-desc">
+          Send tabs to a remote server <a href="https://github.com/aar0u/tab-save/tree/master/tab-save-server" target="_blank">Node.js example</a>
+        </div>
         <label for="remoteUrl">Remote URL:</label>
         <input
           type="text"
@@ -68,11 +70,10 @@
           value="5"
           style="width: 100px"
         />
-        <div>
-          <button id="saveRemote">Save</button> <span id="statusRemote"></span>
-        </div>
+       
         <p id="remoteErrorMsg"></p>
       </fieldset>
+       <div><button id="save">Save</button> <span id="status"></span></div>
     </div>
   </body>
 </html>

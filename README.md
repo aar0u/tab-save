@@ -10,6 +10,11 @@ Open-Source Chrome Extension for Exporting/Importing Open Tabs + Archiving in Va
 - See `tab-save-server/README.md` for setup
 - The server is not required for manual export; use it only if you want automated, periodic HTTP export
 
+## Release Zip
+```
+7z a release.zip ./* -xr!tab-save-server -xr!.git -x!package.json -x!README.md
+```
+
 ## License
 
-MIT
+GNU General Public License v3.0

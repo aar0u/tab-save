@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "Tab-Save",
-    "version": "1.3.3",
-    "description": "Get open tab URLs for window, or load a list of URLs into new tabs on this window.",
+    "version": "1.3.4",
+    "description": "Save, export, and import your open tabs in different formats.",
     "icons":
     {
         "128": "icon128.png"
