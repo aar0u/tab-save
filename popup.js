@@ -1,25 +1,22 @@
-//<!-- yalllinks, an example of a google chrome extension -->
-//<!-- (C) Timothy Jones, October 2013 -->
-//<!-- GNU Public license applies -->
-//back = chrome.extension.getBackgroundPage();
+/*
+ * Tab Save - Chrome Extension
+ * Original Author: Timothy Jones (C) 2013
+ * Maintained and updated by: Aaron (C) 2025
+ * Licensed under the GNU General Public License v3.0
+ * https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 var myCsv = '';
 var contents;
 var openthistab = false;
 var openthese = [];
 
 function geturls() {
-    var favorite1 = localStorage["output_choice1"];
-    if (!favorite1) {
-        var favorite1 = "text";
-    }
-    var favorite2 = localStorage["output_choice2"];
-    if (!favorite2) {
-        var favorite2 = "screen";
-    }
-    var emailadd = localStorage["output_emailadd"];
-    if (!emailadd) {
-        var emailadd = "";
-    }
+    chrome.storage.sync.get(["output_choice1", "output_choice2", "output_emailadd"], function(syncResult) {
+        var favorite1 = syncResult.output_choice1 || "text";
+        var favorite2 = syncResult.output_choice2 || "screen";
+        var emailadd = syncResult.output_emailadd || "";
+
     if (favorite1 == "clipa") {
         window.myCsv = '';
         chrome.tabs.query({ 'currentWindow': true }, function (tabs) {
@@ -108,66 +105,15 @@ function geturls() {
     }
 
     ///////////////////////////////// End text begin gmail
-    if (favorite1 == "gmail") {
-        chrome.tabs.query({ 'currentWindow': true }, function (tabs) {
-            var curDate = new Date();
-            var currentTime = new Date();
-            var month = currentTime.getMonth() + 1;
-            var day = currentTime.getDate();
-            var wday = currentTime.getDay();
-            var year = currentTime.getFullYear();
-            var hours = currentTime.getHours();
-            var minutes = currentTime.getMinutes();
-            if (minutes < 10) { minutes = "0" + minutes; }
-            var monthname = new Array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec");
-            var subjectall = "URL List from ";
-            subjectall += monthname[currentTime.getMonth()] + ". " + day + " " + year + " " + hours + ":" + minutes + " ";
-            // var action_url = "mailto:?"+"subject="+encodeURIComponent(subjectall)+"&"+"body=";
-            var action_url = "https://mail.google.com/mail/?view=cm&fs=1&tf=1&source=mailto&to=" + emailadd + "&su=" + encodeURIComponent(subjectall) + "&" + "body=";
-            tabs.forEach(function (tab) {
-                var temptest = tab.url.split(":");
-                // exclude chrome links   
-                if (checkUrl(temptest[0])) {
-                    // action_url+=encodeURIComponent(tab.title)+"+"+encodeURIComponent("\n\n")+"+"+encodeURIComponent(tab.url)+"+"+encodeURIComponent("\n\n")+"+";
-                    action_url += encodeURIComponent(tab.url) + "+" + encodeURIComponent("\n\n") + "+";
-                }
-            });
-            // var gmaillink = "https://mail.google.com/mail/?extsrc=mailto&url=%s"
-            // action_url = gmaillink.replace("%s",encodeURIComponent(action_url));
+
+    if (favorite2 == "gmail") {
+        collectTabs().then(({ subject, content }) => {
+            var action_url = "https://mail.google.com/mail/?view=cm&fs=1&tf=1&source=mailto&to=" + emailadd + "&su=" + encodeURIComponent(subject) + "&" + "body=";
+            copyToClipboard(content).then(() => { document.getElementById('getgone').innerHTML = "URLs copied!"; });
             chrome.tabs.create({ url: action_url });
         });
     }
 
-    if (favorite1 == "gmail2") {
-        window.myCsv = '';
-        chrome.tabs.query({ 'currentWindow': true }, function (tabs) {
-            var curDate = new Date();
-            var currentTime = new Date();
-            var month = currentTime.getMonth() + 1;
-            var day = currentTime.getDate();
-            var wday = currentTime.getDay();
-            var year = currentTime.getFullYear();
-            var hours = currentTime.getHours();
-            var minutes = currentTime.getMinutes();
-            if (minutes < 10) { minutes = "0" + minutes; }
-            var monthname = new Array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec");
-            var subjectall = "URL List from ";
-            subjectall += monthname[currentTime.getMonth()] + ". " + day + " " + year + " " + hours + ":" + minutes + " ";
-            // var action_url = "mailto:?"+"subject="+encodeURIComponent(subjectall)+"&"+"body=";
-            var action_url = "https://mail.google.com/mail/?view=cm&fs=1&tf=1&source=mailto&to=" + emailadd + "&su=" + encodeURIComponent(subjectall) + "&" + "body=";
-
-            tabs.forEach(function (tab) {
-                var temptest = tab.url.split(":");
-                if (checkUrl(temptest[0])) {
-                    window.myCsv += tab.title + ':\n' + tab.url + '\n\n';
-                }
-            });
-
-            copyToClipboard(window.myCsv).then(() => { document.getElementById('getgone').innerHTML = "URLs copied!"; });
-
-            chrome.tabs.create({ url: action_url });
-        });
-    }
     if (favorite1 == "simple") {
         window.myCsv = '';
         chrome.tabs.query({ 'currentWindow': true }, function (tabs) {
@@ -270,37 +216,39 @@ function geturls() {
             }
         });
     }
-
-    function checkUrl(url) {
-        let notChromeUrl = url != "chrome" && url != "chrome-extension";
-        // return notChromeUrl;
-        return true;
-    }
-
-    function download(fmt, content) {
-        var csvContent = `data:${fmt}/;charset=utf-8,${content}`;
-        var encodedUri = encodeURI(csvContent).replace(/#/g, '%23');;
-        var link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        var currentTime = new Date();
-        var month = currentTime.getMonth() + 1;
-        var day = currentTime.getDate();
-        var wday = currentTime.getDay();
-        var year = currentTime.getFullYear();
-        var hours = currentTime.getHours();
-        var minutes = currentTime.getMinutes();
-        if (minutes < 10) {
-            minutes = "0" + minutes;
-        }
-        var monthname = new Array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec");
-        var datafilename = `Tab_Save_${monthname[currentTime.getMonth()]}_${day}_${year}_${hours}_${minutes}.${fmt}`;
-        link.setAttribute("download", datafilename);
-        link.click();
-        // test
-        // window.open(encodedUri);
-        // window.myCsv = '';
-    }
+    });
 }
+
+function checkUrl(url) {
+    let notChromeUrl = url != "chrome" && url != "chrome-extension";
+    // return notChromeUrl;
+    return true;
+}
+
+function download(fmt, content) {
+    var csvContent = `data:${fmt}/;charset=utf-8,${content}`;
+    var encodedUri = encodeURI(csvContent).replace(/#/g, '%23');;
+    var link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    var currentTime = new Date();
+    var month = currentTime.getMonth() + 1;
+    var day = currentTime.getDate();
+    var wday = currentTime.getDay();
+    var year = currentTime.getFullYear();
+    var hours = currentTime.getHours();
+    var minutes = currentTime.getMinutes();
+    if (minutes < 10) {
+        minutes = "0" + minutes;
+    }
+    var monthname = new Array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec");
+    var datafilename = `Tab_Save_${monthname[currentTime.getMonth()]}_${day}_${year}_${hours}_${minutes}.${fmt}`;
+    link.setAttribute("download", datafilename);
+    link.click();
+    // test
+    // window.open(encodedUri);
+    // window.myCsv = '';
+}
+
 //ends getURLs
 
 function openFromInput() {
@@ -431,4 +379,27 @@ function copyToClipboard(text) {
         document.execCommand('copy');
         return Promise.resolve();
     }
+}
+
+function collectTabs(urlFilter = checkUrl, formatter) {
+    return new Promise((resolve) => {
+        chrome.tabs.query({ 'currentWindow': true }, function (tabs) {
+            const now = new Date();
+            const pad = n => n < 10 ? '0' + n : n;
+            const monthname = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const subject = `URL List from ${monthname[now.getMonth()]}. ${now.getDate()} ${now.getFullYear()} ${now.getHours()}:${pad(now.getMinutes())} `;
+            let content = "";
+            tabs.forEach(tab => {
+                const protocol = tab.url.split(":")[0];
+                if (urlFilter(protocol)) {
+                    if (formatter) {
+                        content += formatter(tab);
+                    } else {
+                        content += `${tab.title}:\n${tab.url}\n\n`;
+                    }
+                }
+            });
+            resolve({ subject, content });
+        });
+    });
 }

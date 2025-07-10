@@ -1,28 +1,16 @@
-// Saves options to localStorage.
 function save_options() {
-    var select = document.getElementById("output1");
-    var output1 = select.children[select.selectedIndex].value;
-    localStorage["output_choice1"] = output1;
+    var output1 = document.getElementById("output1").value;
+    var output2 = document.getElementById("output2").value;
+    var emailadd = document.getElementById("emailadded").value;
 
-    var select = document.getElementById("output2");
-    var output2 = select.children[select.selectedIndex].value;
-    localStorage["output_choice2"] = output2;
+    chrome.storage.sync.set({
+        output_choice1: output1,
+        output_choice2: output2,
+        output_emailadd: emailadd
+    });
 
     // Update status to let user know options were saved.
     var status = document.getElementById("status");
-    status.innerHTML = "Options Saved.";
-    setTimeout(function () {
-        status.innerHTML = "";
-    }, 750);
-}
-
-function save_options2() {
-    var text = document.getElementById("emailadded");
-    var emailadd = text.value;
-    localStorage["output_emailadd"] = emailadd;
-
-    // Update status to let user know options were saved.
-    var status = document.getElementById("status2");
     status.innerHTML = "Options Saved.";
     setTimeout(function () {
         status.innerHTML = "";
@@ -44,33 +32,34 @@ function saveRemoteSettings() {
     });
 }
 
-// Restores select box state to saved value from localStorage.
 function restore_options() {
-    var favorite1 = localStorage["output_choice1"];
-    if (!favorite1) {
-        return;
-    }
-    var select = document.getElementById("output1");
-    for (var i = 0; i < select.children.length; i++) {
-        var child = select.children[i];
-        if (child.value == favorite1) {
-            child.selected = "true";
-            break;
+    chrome.storage.sync.get(["output_choice1", "output_choice2", "output_emailadd"], function(syncResult) {
+        var favorite1 = syncResult.output_choice1;
+        if (favorite1) {
+            var select = document.getElementById("output1");
+            for (var i = 0; i < select.children.length; i++) {
+                var child = select.children[i];
+                if (child.value == favorite1) {
+                    child.selected = "true";
+                    break;
+                }
+            }
         }
-    }
-
-    var favorite2 = localStorage["output_choice2"];
-    if (!favorite2) {
-        return;
-    }
-    var select = document.getElementById("output2");
-    for (var i = 0; i < select.children.length; i++) {
-        var child = select.children[i];
-        if (child.value == favorite2) {
-            child.selected = "true";
-            break;
+        var favorite2 = syncResult.output_choice2;
+        if (favorite2) {
+            var select = document.getElementById("output2");
+            for (var i = 0; i < select.children.length; i++) {
+                var child = select.children[i];
+                if (child.value == favorite2) {
+                    child.selected = "true";
+                    break;
+                }
+            }
         }
-    }
+        // 恢复 email
+        var emailadd = syncResult.output_emailadd || "";
+        document.getElementById("emailadded").value = emailadd;
+    });
 }
 
 function displayRemoteError() {
@@ -103,10 +92,6 @@ chrome.storage.onChanged.addListener(function(changes, area) {
 document.addEventListener('DOMContentLoaded', function() {
     restore_options();
     restoreRemoteSettings();
+    document.querySelector('#save').addEventListener('click', save_options);
+    document.getElementById('saveRemote').addEventListener('click', saveRemoteSettings);
 });
-document.querySelector('#save').addEventListener('click', save_options);
-document.querySelector('#save2').addEventListener('click', save_options2);
-document.getElementById('saveRemote').addEventListener('click', saveRemoteSettings);
-if (localStorage["output_emailadd"]) {
-    document.querySelector('#emailadded').value = localStorage["output_emailadd"];
-}

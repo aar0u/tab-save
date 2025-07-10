@@ -1,55 +1,73 @@
-<!-- yalllinks, an example of a google chrome extension -->
-<!-- (C) Timothy Jones, October 2013 -->
-<!-- GNU Public license applies -->
+<!--
+ Tab Save - Chrome Extension
+ Original Author: Timothy Jones (C) 2013
+ Maintained and updated by: Aaron (C) 2025
+ Licensed under the GNU General Public License v3.0
+ https://www.gnu.org/licenses/gpl-3.0.html
+-->
 <!DOCTYPE html>
 <html>
+  <head>
+    <title>Tab-Save</title>
+    <link rel="stylesheet" type="text/css" href="de.css" media="all" />
+    <script src="popup.js"></script>
+  </head>
 
-<head>
-  <style>
-    body {
-      /* min-width:357px; */
-      overflow-x: hidden;
-    }
-  </style>
-  <title>Tab-Save</title>
-  <link rel="stylesheet" type="text/css" href="de.css" media="all" />
-  <script src="popup.js"></script>
-</head>
-
-<body>
-  <div id="content">
-    <div id="getem">
-      <fieldset class="fs1">
-        <legend class="up">SNAPSHOT</legend>
-        <fieldset class="fs2">
-          <!--<legend>Get list of tab URLs</legend>-->
-          <div id="getgone">Click here to get URLs.</div>
-        </fieldset>
+  <body>
+    <div id="content">
+      <fieldset>
+        <legend>Extract</legend>
+        <div class="section-desc">Export open tabs.</div>
+        <button id="getgone" style="width: 100%; margin-bottom: 10px">
+          Extract Tabs
+        </button>
+      </fieldset>
+      <fieldset>
+        <legend>Restore</legend>
+        <div class="section-desc">
+          Paste a list of URLs (one per line or markdown format) and open them
+          in new tabs.
+        </div>
+        <textarea
+          id="inputbox"
+          rows="5"
+          placeholder="Paste URLs or markdown here..."
+        ></textarea>
+        <button id="button1" style="width: 100%; margin-bottom: 10px">
+          Open URLs
+        </button>
+        <div style="display: flex; align-items: center; margin: 16px 0 10px 0;">
+          <hr style="flex: 1; border: none; border-top: 1.5px solid #e0e4ea; margin: 0 10px;" />
+          <span style="color: #888; font-size: 0.97em; font-weight: 600; text-transform: uppercase;">or</span>
+          <hr style="flex: 1; border: none; border-top: 1.5px solid #e0e4ea; margin: 0 10px;" />
+        </div>
+        <div style="text-align: center; color: #888; font-size: 0.98em; margin-bottom: 6px;">
+          Pick a file to open URLs:
+        </div>
+        <label
+          for="file"
+          class="button"
+          style="
+            width: 100%;
+            display: inline-block;
+            margin-bottom: 10px;
+            text-align: center;
+            background: #3a7afe;
+            color: #fff;
+            border-radius: 6px;
+            padding: 8px 0;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+          "
+          >Open from file</label
+        >
+        <input type="file" id="file" name="file" style="display: none;" />
+      </fieldset>
+      <p class="small" style="text-align: center">
+        <a href="options.html">Options &gt;</a>
+      </p>
     </div>
-    <br>
-    <fieldset class="fs1">
-      <legend class="up">RESTORE</legend>
-      <fieldset class="fs2">
-        <legend>Paste and open list of URLs</legend>
-        <p3>Paste (type: [Ctrl] v) list of URLs:</p3><BR>
-        <textarea id="inputbox" rows="6" cols="30" autocomplete="off"></textarea>
-        <p><button id="button1">Open List</button></p>
-      </fieldset>
-
-      <!-- <div id="pastem">
-          <label>Click here to paste URLs.</label>
-        </div> -->
-
-      <!-- </fieldset> -->
-      <h3>or</h3>
-      <fieldset class="fs2">
-        <legend class="down">Open a text or csv file</legend>
-        <input type="file" id="file" name="file" />
-        <output id="list"></output>
-      </fieldset>
-    </fieldset>
-    <p class="small"><a href="options.html">options &gt;</a></p>
-  </div>
-</body>
-
+  </body>
 </html>

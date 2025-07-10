@@ -1,86 +1,78 @@
 <html>
-
-<head>
+  <head>
     <title>Tab-Save Options</title>
     <link rel="stylesheet" type="text/css" href="de.css" media="all" />
-    <style>
-        body {
-            min-width: 257px;
-            overflow-x: hidden;
-        }
-    </style>
-</head>
+    <script src="options.js"></script>
+  </head>
 
-<body>
+  <body>
     <div id="content">
-        <p class="small"><a href="popup.html">&lt; back</a></p>
-        <img src="icon128.png" width="20px" style="margin:3px">
-        <fieldset>
-            <legend>Options</legend>
-            <p>Select output format:<br>
-                <select id="output1">
-                    <option value="text">text: date, title, plus url</option>
-                    <option value="simple">text: simple url</option>
-                    <option value="clipa">copy: simple to clipboard</option>
-                    <option value="clipb">copy: text to clipboard</option>
-                    <option value="gmail">gmail: pre-filled (up to 22 tabs)</option>
-                    <option value="gmail2">gmail: blank with unlimited urls copied to clipboard</option>
-                    <option value="csv1">csv: title, url</option>
-                    <option value="csv2">csv: date, title, url</option>
-                    <option value="csv3">csv: date, url</option>
-                </select></p>
-            <p>Select output type:<br>
-                <select id="output2">
-                    <option value="screen">to screen</option>
-                    <option value="file">to file</option>
-                </select></p>
-            <p><button id="save">Save</button> <span id="status"></span></p>
-        </fieldset>
-        <br>
-        <fieldset>
-            <legend>Format</legend>
-            <p><b>copy</b>: copy simple copies only URL links to the clipboard,
-                copy text copies titles and URLs to the clipboard.</p>
-            <p><b>text</b>: simple text format with page titles and URLs</p>
-            <p><b>csv</b>: format that can be opened in MS Excel and other database applications</p>
-            <p><b>simple</b>: just the URLs</p>
-            <p><b>gmail</b>: the first gmail option is for prefilled compose window
-                but limited to up to about 22 tabs due to gmail limitations, the second
-                gmail option sets up a compose window and copies an unlimited amount of
-                tab title and urls to the clipboard so that
-                all you have to do is paste into the body of the gmail compose window. If you want
-                the gmail option to also fill in recipients, select here:
-            <fieldset>
-                <legend>Optional</legend>
-                <p>Recipient <input type="text" name="emailadded" id="emailadded"></p>
-                <p><button id="save2">Save</button>
-                    <span id="status2"></span></p>
-            </fieldset>
-        </fieldset>
-        <br>
-        <fieldset>
-            <legend>Type</legend>
-            <p>These options are not used when the user chooses to copy to clipboard or gmail for output format.</p>
-            <p><b>screen</b>: prints to the screen; use can use Cntrl-a Cntrl-c to copy the contents and Cntrl-v to
-                paste them. On Macs, this is Cmmnd-a Cmmnd-c to copy and Cmmnd-v to paste.
-            </p>
-            <p><b>file</b>: prints to file which will be named based on the date with
-                prefix "Tab_Save" and extension ".csv" for csv formats or ".txt" for text format.</p>
-        </fieldset>
-        <br>
-        <fieldset>
-            <legend>Remote Server (Optional)</legend>
-            <p>Remote URL for periodic export:<br>
-                <input type="text" id="remoteUrl" style="width:90%" placeholder="http://localhost:3000/tabs">
-            </p>
-            <p>Export interval (minutes):<br>
-                <input type="number" id="exportInterval" min="1" max="1440" value="5" style="width:60px"> (default: 5)
-            </p>
-            <p><button id="saveRemote">Save</button> <span id="statusRemote"></span></p>
-            <p id="remoteErrorMsg" style="color:#b36b00; display:none; font-size: 90%;"></p>
-        </fieldset>
+      <p class="small">
+        <img
+          src="icon128.png"
+          width="28px"
+          style="vertical-align: middle; margin-right: 8px"
+        />
+        <a href="popup.html">&lt; back</a>
+      </p>
+      <fieldset>
+        <legend>General Options</legend>
+        <div class="section-desc">
+          Choose your preferred output format and type.
+        </div>
+        <label for="output1">Output format:</label>
+        <select id="output1">
+          <option value="text">Text: date, title, plus url</option>
+          <option value="simple">Text: simple url</option>
+          <option value="csv1">CSV: title, url</option>
+          <option value="csv2">CSV: date, title, url</option>
+          <option value="csv3">CSV: date, url</option>
+        </select>
+        <label for="output2">Output type:</label>
+        <select id="output2">
+          <option value="screen">Page</option>
+          <option value="file">File</option>
+          <option value="clipboard">Clipboard</option>
+          <option value="gmail">Email</option>
+        </select>
+        <div class="section-desc">
+          <b>Email</b>: Opens Gmail with subject filled; content is copied -
+          paste it manually.
+        </div>
+        <label for="emailadded">Email recipient (optional):</label>
+        <input
+          type="text"
+          name="emailadded"
+          id="emailadded"
+          placeholder="Email address"
+        />
+        <div><button id="save">Save</button> <span id="status"></span></div>
+      </fieldset>
+      <fieldset>
+        <legend>Remote Server (Optional)</legend>
+        <div class="section-desc">Sent open tabs to a remote server.</div>
+        <label for="remoteUrl">Remote URL:</label>
+        <input
+          type="text"
+          id="remoteUrl"
+          placeholder="http://localhost:3000/tabs"
+        />
+        <label for="exportInterval"
+          >Export interval (minutes, default: 5):</label
+        >
+        <input
+          type="number"
+          id="exportInterval"
+          min="1"
+          max="1440"
+          value="5"
+          style="width: 100px"
+        />
+        <div>
+          <button id="saveRemote">Save</button> <span id="statusRemote"></span>
+        </div>
+        <p id="remoteErrorMsg"></p>
+      </fieldset>
     </div>
-</body>
-<script src="options.js"></script>
-
+  </body>
 </html>
