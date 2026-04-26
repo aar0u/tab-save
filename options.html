@@ -57,7 +57,19 @@
         <input
           type="text"
           id="remoteUrl"
-          placeholder="http://localhost:3000/tabs"
+          placeholder="http://localhost:3000/api/tabs"
+        />
+        <label for="machineId">Machine ID:</label>
+        <input
+          type="text"
+          id="machineId"
+          placeholder="home-pc"
+        />
+        <label for="authToken">Auth Token:</label>
+        <input
+          type="text"
+          id="authToken"
+          placeholder="changeme"
         />
         <label for="exportInterval"
           >Export interval (minutes, default: 5):</label
@@ -71,7 +83,7 @@
           style="width: 100px"
         />
        
-        <p id="remoteErrorMsg"></p>
+        <p id="syncStatus"></p>
       </fieldset>
        <div><button id="save">Save</button> <span id="status"></span></div>
     </div>

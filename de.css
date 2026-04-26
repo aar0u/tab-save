@@ -59,11 +59,14 @@ button:hover {
     color: #3a7afe;
     font-size: 0.98em;
 }
-#remoteErrorMsg {
+#syncStatus {
     color: #b36b00;
     display: none;
     font-size: 0.97em;
     margin-top: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .small {
     font-size: 0.95em;
