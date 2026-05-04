@@ -12,10 +12,10 @@ function save_options() {
         output_choice2: output2,
         output_emailadd: emailadd,
         tabSaveRemoteUrl: remoteUrl,
-        tabSaveMachineId: machineId,
         tabSaveAuthToken: authToken,
         exportInterval: exportInterval
     }, function() {
+        chrome.storage.local.set({ tabSaveMachineId: machineId });
         var status = document.getElementById("status");
         status.innerHTML = "Options Saved.";
         chrome.runtime.sendMessage({ type: "tabSaveRunNow" });
@@ -28,8 +28,9 @@ function save_options() {
 function restore_options() {
     chrome.storage.sync.get([
         "output_choice1", "output_choice2", "output_emailadd",
-        "tabSaveRemoteUrl", "tabSaveMachineId", "tabSaveAuthToken", "exportInterval"
+        "tabSaveRemoteUrl", "tabSaveAuthToken", "exportInterval"
     ], function(syncResult) {
+        chrome.storage.local.get(["tabSaveMachineId"], function(localResult) {
         var favorite1 = syncResult.output_choice1;
         if (favorite1) {
             var select = document.getElementById("output1");
@@ -57,15 +58,16 @@ function restore_options() {
         document.getElementById("emailadded").value = emailadd;
         // 恢复 remote settings
         document.getElementById("remoteUrl").value = syncResult.tabSaveRemoteUrl || "http://localhost:3000/api/tabs";
-        var machineId = (syncResult.tabSaveMachineId || "").trim();
+        var machineId = (localResult.tabSaveMachineId || "").trim();
         if (!machineId) {
             machineId = "ts-" + Math.random().toString(36).slice(2, 10).toUpperCase();
-            chrome.storage.sync.set({ tabSaveMachineId: machineId });
+            chrome.storage.local.set({ tabSaveMachineId: machineId });
         }
         document.getElementById("machineId").value = machineId;
         document.getElementById("authToken").value = syncResult.tabSaveAuthToken || "";
         document.getElementById("exportInterval").value = syncResult.exportInterval || 5;
         displaySyncStatus();
+        });
     });
 }
 

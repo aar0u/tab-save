@@ -43,16 +43,16 @@ function exportTabsAsMarkdown() {
     chrome.storage.sync.get([
       "tabSaveRemoteUrl",
       "tabSaveRemoteFailCount",
-      "tabSaveMachineId",
       "tabSaveAuthToken"
-    ], (result) => {
-      const remoteUrl = result.tabSaveRemoteUrl || "http://localhost:3000/api/tabs";
-      const failCount = result.tabSaveRemoteFailCount || 0;
-      const authToken = (result.tabSaveAuthToken || "changeme").trim();
-      let machineId = (result.tabSaveMachineId || "").trim();
+    ], (syncResult) => {
+      chrome.storage.local.get(["tabSaveMachineId"], (localResult) => {
+      const remoteUrl = syncResult.tabSaveRemoteUrl || "http://localhost:3000/api/tabs";
+      const failCount = syncResult.tabSaveRemoteFailCount || 0;
+      const authToken = (syncResult.tabSaveAuthToken || "changeme").trim();
+      let machineId = (localResult.tabSaveMachineId || "").trim();
       if (!machineId) {
         machineId = "ts-" + Math.random().toString(36).slice(2, 10).toUpperCase();
-        chrome.storage.sync.set({ tabSaveMachineId: machineId });
+        chrome.storage.local.set({ tabSaveMachineId: machineId });
       }
       const FAIL_THRESHOLD = 3;
       const lastCallAt = new Date().toISOString();
@@ -93,6 +93,7 @@ function exportTabsAsMarkdown() {
           }
           chrome.storage.sync.set(errorObj);
         });
+      });
     });
   });
 }
