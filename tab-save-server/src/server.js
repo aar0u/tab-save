@@ -35,7 +35,8 @@ const server = http.createServer((req, res) => {
       try {
         const data = JSON.parse(body);
         const content = data.content || '';
-        fs.writeFile(path.join(__dirname, 'output.md'), content, err => {
+        const output = `### 📌 ${new Date().toLocaleString()}\n\n${content}`;
+        fs.writeFile(path.join(__dirname, 'output.md'), output, err => {
           if (err) {
             console.error('❌ Error writing to file:', err);
             res.writeHead(500, { 'Content-Type': 'text/plain' });

@@ -32,67 +32,75 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   }
 });
 
+async function contentHash(content) {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(content));
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
 function exportTabsAsMarkdown() {
-  chrome.tabs.query({}, function (tabs) {
-    const markdown = tabs
-      .map((tab) => `- [${tab.title}](${tab.url})`)
-      .join("\n");
-    const now = new Date().toLocaleString();
-    const payload = `### 📌 ${now}\n\n${markdown}\n\n---\n`;
+  chrome.tabs.query({}, async (tabs) => {
+    const content = `${tabs.map((tab) => `- [${tab.title}](${tab.url})`).join("\n")}\n`;
 
     chrome.storage.sync.get([
       "tabSaveRemoteUrl",
       "tabSaveRemoteFailCount",
       "tabSaveAuthToken"
     ], (syncResult) => {
-      chrome.storage.local.get(["tabSaveMachineId"], (localResult) => {
-      const remoteUrl = syncResult.tabSaveRemoteUrl || "http://localhost:3000/api/tabs";
-      const failCount = syncResult.tabSaveRemoteFailCount || 0;
-      const authToken = (syncResult.tabSaveAuthToken || "changeme").trim();
-      let machineId = (localResult.tabSaveMachineId || "").trim();
-      if (!machineId) {
-        machineId = "ts-" + Math.random().toString(36).slice(2, 10).toUpperCase();
-        chrome.storage.local.set({ tabSaveMachineId: machineId });
-      }
-      const FAIL_THRESHOLD = 3;
-      const lastCallAt = new Date().toISOString();
+      chrome.storage.local.get(["tabSaveMachineId", "tabSaveLastContentHash"], async (localResult) => {
+        const remoteUrl = syncResult.tabSaveRemoteUrl || "http://localhost:3000/api/tabs";
+        const failCount = syncResult.tabSaveRemoteFailCount || 0;
+        const authToken = (syncResult.tabSaveAuthToken || "changeme").trim();
+        let machineId = (localResult.tabSaveMachineId || "").trim();
+        if (!machineId) {
+          machineId = "ts-" + Math.random().toString(36).slice(2, 10).toUpperCase();
+          chrome.storage.local.set({ tabSaveMachineId: machineId });
+        }
 
-      chrome.storage.sync.set({
-        tabSaveLastCallAt: lastCallAt,
-        tabSaveSyncStatus: "Syncing..."
-      });
+        const hash = await contentHash(content);
+        if (hash === localResult.tabSaveLastContentHash) {
+          chrome.storage.sync.set({ tabSaveSyncStatus: "Unchanged" });
+          return;
+        }
 
-      fetch(remoteUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${authToken}`
-        },
-        body: JSON.stringify({ content: payload, machine_id: machineId }),
-      })
-        .then((res) => {
-          if (!res.ok) {
-            throw new Error(`HTTP ${res.status}`);
-          }
-          console.log("✅ Tabs exported successfully:", res.status);
-          chrome.storage.sync.set({
-            tabSaveRemoteFailCount: 0,
-            tabSaveSyncStatus: "Success"
-          });
-        })
-        .catch((err) => {
-          const newFailCount = failCount + 1;
-          let errorObj = { tabSaveRemoteFailCount: newFailCount };
-          if (newFailCount >= FAIL_THRESHOLD) {
-            errorObj.tabSaveSyncStatus = "Stopped after 3 failed attempts";
-            chrome.alarms.clear("exportTabs");
-            console.warn("⚠️ Remote server unreachable, alarm stopped.", err);
-          } else {
-            errorObj.tabSaveSyncStatus = `Warning: failed attempt ${newFailCount}/${FAIL_THRESHOLD}`;
-            console.warn("⚠️ Warning:", err);
-          }
-          chrome.storage.sync.set(errorObj);
+        const FAIL_THRESHOLD = 3;
+        const lastCallAt = new Date().toISOString();
+        chrome.storage.sync.set({
+          tabSaveLastCallAt: lastCallAt,
+          tabSaveSyncStatus: "Syncing..."
         });
+
+        fetch(remoteUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${authToken}`
+          },
+          body: JSON.stringify({ content, machine_id: machineId }),
+        })
+          .then((res) => {
+            if (!res.ok) {
+              throw new Error(`HTTP ${res.status}`);
+            }
+            console.log("✅ Tabs exported successfully:", res.status);
+            chrome.storage.local.set({ tabSaveLastContentHash: hash });
+            chrome.storage.sync.set({
+              tabSaveRemoteFailCount: 0,
+              tabSaveSyncStatus: "Success"
+            });
+          })
+          .catch((err) => {
+            const newFailCount = failCount + 1;
+            const errorObj = { tabSaveRemoteFailCount: newFailCount };
+            if (newFailCount >= FAIL_THRESHOLD) {
+              errorObj.tabSaveSyncStatus = "Stopped after 3 failed attempts";
+              chrome.alarms.clear("exportTabs");
+              console.warn("⚠️ Remote server unreachable, alarm stopped.", err);
+            } else {
+              errorObj.tabSaveSyncStatus = `Warning: failed attempt ${newFailCount}/${FAIL_THRESHOLD}`;
+              console.warn("⚠️ Warning:", err);
+            }
+            chrome.storage.sync.set(errorObj);
+          });
       });
     });
   });

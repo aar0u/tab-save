@@ -33,7 +33,7 @@ The server listens at `http://localhost:3000`.
     { "content": "# tabs..." }
     ```
   - Behavior:
-    - Overwrites `src/output.md` with `content`
+    - Overwrites `src/output.md` with the server receive time and `content`
     - Returns `401` if token is invalid
     - Returns `400` if JSON is malformed
 
